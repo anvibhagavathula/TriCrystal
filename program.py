@@ -11,11 +11,11 @@ print ('************************************************************************
 
 # reading csv with elements from workspace
 # i.e. directory where you installed tricrystal
-with open('workspace') as f:
-    line = f.readline()
+"""with open('workspace') as f:
+    line = f.readline()"""
 
-program_directory = str(line).rstrip("\n")
-dir1 = os.path.join("" +program_directory+"", 'periodic_table.csv')
+#program_directory = str(line).rstrip("\n")
+dir1 = os.path.join("/Users/anvitabhagavathula/Desktop/DL/TriCrystal/", 'periodic_table.csv')
 colnames = ['number', 'symbol']
 periodic_table = pandas.read_csv(dir1, usecols=colnames)
 number = periodic_table.number.tolist()
@@ -340,12 +340,12 @@ sim = np.array(sim)
 sim = np.unique(sim)
 
 if len(sim) >= 1:
-    top_frac = np.delete(mid_frac, sim[1:], 0)
+    mid_frac = np.delete(mid_frac, sim[1:], 0)
     symtop = np.delete(symmid, sim[1:], 0)
 
 i = 0
 nat_mid=0
-for atm in top_frac:
+for atm in mid_frac:
     print ('{:2} {:12.6f} {:12.6f} {:12.6f}'.format(symmid[i], atm[0], atm[1], atm[2]))
     i+=1
     nat_mid+=1
@@ -354,114 +354,16 @@ elmd = time.time() - md0
 
 ################### loops for top layer ##################
 #############################################################
-
 tp0 = time.time()
-
-tt1 = []
-tt2 = []
-atoms_top = []
-symb1 = []
-symb2 = []
-k = 0
-for atm in tt_bot:
-    u = elt_bot[k]
-    k = k + 1
-    for i in range(0,(m+n)*15):
-        ttx = atm + i*a1
-        tt1.append(ttx)
-        symb1.append(u)
-k = 0
-for atm in tt1:
-    u = symb1[k]
-    k = k + 1
-    for i in range(1,(n+m)*15):
-        tty = atm + i*a2
-        tt2.append(tty)
-        symb2.append(u)
-symb_top = symb1 + symb2
-atoms_top = list(tt1) + list (tt2)
-
-elbt1 = time.time() - bt1
-
-### Initializing new unit cell ###
-
-# new cell parameters
-newa1b, newa2b, v1b, v2b, v3b, v4b = newcell(my_crystal,tt_bot[idx2],m,n)
-unitcell = newa1b,newa2b,a3
-unitcell = np.array(unitcell)
-
-# polygon boundary
-boundary_bot,p1b,p2b,p3b,p4b = poly(v1b,v2b,v3b,v4b)
-
-# center atom
-org = central(boundary_bot)
-destinations = MultiPoint(atoms_bot)
-nearest_geoms = nearest_points(org, destinations)
-origin = np.array([nearest_geoms[1].x, nearest_geoms[1].y, 0])
-
-ex = 1
-Rt = Rb
-v1r,v2r,v3r,v4r = rotcell(v1b*ex,v2b*ex,v3b*ex,v4b*ex,origin,Rt)
-boundary_top,p1t,p2t,p3t,p4t = poly(v1r,v2r,v3r,v4r)
-
-# list of atomic numbers from symbols
-symb_num_top = []
-for i in range(0,len(symb_top)):
-    idx = symbol.index(symb_top[i])
-    symb_num_top.append(number[idx])
-
-# number of types of atomic species
-typ = ntype(my_crystal)
-
-# Initializing check for which atoms lie within the new unit cell
-top = []
-symtop = []
-atoms_top = atoms_top - origin
-supx,supy,supz = atoms_top.T
-
-for i in range(0,len(atoms_top)):
-    num = symb_num_top[i]
-    if inpoly(atoms_top[i],boundary_top) == True:
-        tp =  supx[i], supy[i], supz[i]
-        top.append(tp)
-        symtop.append(symb_top[i])
-
-topl = top
-top = np.array(top)
-top_frac = np.dot(top, (np.linalg.inv(unitcell)))
-
-for i in range(1,m+n):
-    top_frac[top_frac<0] += 1
-top_frac[top_frac>1] += -1
-
-i = 0
-sim = []
-for atm1 in top_frac:
-    count = 0
-    for atm2 in top_frac:
-        if (round(atm1[0],2) == round(atm2[0],2) and round(atm1[1],2) == round(atm2[1],2) and round(atm1[2],2)== round(atm2[2],2)) == True:
-            count+=1
-        if count > 1:
-            sim.append(i)
-    i+=1
-sim = np.array(sim)
-sim = np.unique(sim)
-
-if len(sim) >= 1:
-    top_frac = np.delete(top_frac, sim[1:], 0)
-    symtop = np.delete(symtop, sim[1:], 0)
 
 i = 0
 nat_top=0
-for atm in top_frac:
-    print ('{:2} {:12.6f} {:12.6f} {:12.6f}'.format(symtop[i], atm[0], atm[1], atm[2]+0.5))
+for atm in bot_frac:
+    print ('{:2} {:12.6f} {:12.6f} {:12.6f}'.format(symbot[i], atm[0], atm[1], atm[2]+1.0))
     i+=1
     nat_top+=1
 
 eltp = time.time() - tp0
-
-
-
 
 ########################################################
 ############## closing part of scf.in file #############
@@ -492,110 +394,3 @@ print ('\nCELL_PARAMETERS bohr')
 print ('   ','{:17.12f} {:17.12f} {:17.12f}'.format(uc1[0],uc1[1],uc1[2]))
 print ('   ','{:17.12f} {:17.12f} {:17.12f}'.format(uc2[0],uc2[1],uc2[2]))
 print ('   ','{:17.12f} {:17.12f} {:17.12f}'.format(uc3[0],uc3[1],uc3[2]))
-
-#############################################################
-##################### PLOTTING RESULTS ######################
-
-pt1 = time.time()
-
-## figure settings ##
-fig = plt.figure(figsize = (8, 8))
-ax = fig.add_subplot(111, projection='3d')
-fig.set_facecolor('white')
-ax.set_facecolor('white')
-ax.grid(False)
-ax.set_xticks([])
-ax.set_yticks([])
-ax.set_zticks([])
-plt.axis('off')
-plt.grid(b=None)
-
-
-# Initializing bottom coordinates for new unitcell plotting
-coord = [p1b, p2b, p3b, p4b]
-coord.append(coord[0])
-xb, yb = zip(*coord)
-
-# plotting boundary at lowest z position
-zb = lowest(my_crystal)
-plt.plot(xb,yb,zb)
-
-# plotting bottom layer atoms
-bot = bot.T
-supx,supy,supz = list(bot)
-ax.scatter(supx, supy, supz, s=5*num, c='tab:green', alpha=0.4)
-ax.scatter(supx, supy, supz, c='tab:blue')
-
-# Adding bonds to bottom layer
-neigh = NearestNeighbors(radius=bond_distance+0.1).fit(botl)
-for atm in botl:
-    rng = neigh.radius_neighbors([list(atm)])
-    dis = np.asarray(rng[0][0])
-    idx = np.asarray(rng[1][0])
-    if inpoly(atm,boundary_bot) == True:
-        for i in idx:
-            atz = []
-            atz.append(atm)
-            atz.append(list(botl[i]))
-            xb, yb, zb = zip(*atz)
-            num = symb_num_bot[i]
-            plt.plot(xb,yb,zb, '-bo',alpha=1)
-
-
-# Initializing TOP coordinates for new unitcell plotting
-coord = [p1t, p2t, p3t, p4t]
-coord.append(coord[0])
-xt, yt = zip(*coord)
-
-# plotting the boundary at hiest z position
-zt = highest(my_crystal)
-plt.plot(xt,yt,zt)
-
-# plotting TOP layer atoms
-top = top.T
-supx,supy,supz = list(top)
-ax.scatter(supx, supy, supz, s=5*num, c='tab:red', alpha=0.4)
-ax.scatter(supx, supy, supz, c='tab:blue')
-
-# Adding bonds to TOP layer
-neigh = NearestNeighbors(radius=bond_distance+0.1).fit(midl)
-for atm in midl:
-    rng = neigh.radius_neighbors([list(atm)])
-    dis = np.asarray(rng[0][0])
-    idx = np.asarray(rng[1][0])
-    if inpoly(atm,boundary_mid) == True:
-        for i in idx:
-            atz = []
-            atz.append(atm)
-            atz.append(list(midl[i]))
-            xt, yt, zt = zip(*atz)
-            num = symb_num_mid[i]
-            plt.plot(xt,yt,zt, '-ro',alpha=1)
-
-
-
-plt.show()
-
-elplt = time.time() - pt1
-
-
-j2 = 90 + np.rad2deg(phi/2)
-mk = 1/(2*(np.abs(np.sin((phi/2)))))
-########################## SUMMARY REPORT ###############################
-
-print ("\n********************* SUMMARY REPORT ***********************")
-#print ('\nRotation angle (deg) = ', np.round(rotation_angle,3))
-#print ('Relative Rotation (deg) = ',np.round(np.rad2deg(phi),3))
-print ('\nHermann moire rotation = ', j2)
-print ('Hermann moire constant = ', mk)
-print ('\nTop atoms(rotated) = ',len(top_frac))
-print ('Bottom atoms  = ',len(bot_frac))
-print ('\nTotal atoms \n=', len(bot_frac)+len(top_frac))
-#print ('\n Gamma = ', j2 + np.round(rotation_angle,3))
-#print ( '\n lattice vectors = ',1.8897259886*a, 1.8897259886*b, 1.8897259886*c)
-#print ('\n Erin method lattice vectors = ',1.8897259886*old_a,1.8897259886*old_b)
-#print ('time for replication', elbt1)
-#print ('time for plotting', elplt)
-#print ('\ntotal time top layer',eltp)
-#print ('total time bottom layer',elbt)
-print ('\n*************************** Done!! **************************\n')
