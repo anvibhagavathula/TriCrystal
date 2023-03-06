@@ -346,7 +346,7 @@ def scale_interlayer(vacuum_param):
         Returns: 
         Scaled value of interlayer spacing """
 
-        spacing = (0.084 * vacuum_param) / 80.0 
+        spacing = (3.36/vacuum_param)*2
         spacing = np.round(spacing, 3)
 
         return spacing 
