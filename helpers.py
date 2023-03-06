@@ -301,12 +301,6 @@ def ntype(my_crystal):
 
 
 
-#***************************************
-# Function name: BULK(MY_CRYSTAL)
-# Description: Create arrays of top and bottom atoms in the crystal
-# Input: python Crystal
-# Output: top and bottom atoms ---> np arrays; chemical symbols for top and bottom  atoms ---> lists
-
 def bulk(my_crystal):
         """ Function creates arrays of top and 
         bottom atoms in the crystal
@@ -339,7 +333,7 @@ def bulk(my_crystal):
                         ele_top.append(ELE)
         return np.array(atoms_top), np.array(atoms_bot), ele_top, ele_bot
 
-#***************************************
+
 
 def scale_interlayer(vacuum_param): 
         """ Function scales the interlayer spacing between

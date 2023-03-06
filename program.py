@@ -1,48 +1,46 @@
 
 from helpers import * 
 
-# Start...
+#--------------------------------------------------------------------------------------------------------
+
+# WELCOME MESSAGE 
 print ('\n\n*************************** WELCOME TO TriCRYSTAL ***************************\n\n * TriCRYSTAL: Commensurate and incommensurate crystal structures of layered materials\n (c) 2020 Johnson Chemistry Group, Dalhousie University\n')
 print (' Description: TriCrystal builds commensurate and incommensurate structures of layered materials.\n Current version reads CIF files and writes the new structure to a QUANTUM ESPRESSO input file.\n Additional information such as the bond distance between atoms, lattice vectors in Bohr and Angstrom, and a simple 3D plot of each layer is also provided.\n\n Authored by: T. Kabengele \n Contact: tilas.kabengele@dal.ca \n\n using: Python 3.7.6 \n with libraries: numpy, matplotlib \n imported library: crystals \n (c) Copyright 2020, Laurent P. René de Cotret \n Install via: pip install crystals\n\n')
-
-now = datetime.now()
-print ('* TriCRYSTAL--', now,'\n\n')
+print ('* TriCRYSTAL--', datetime.now(),'\n\n')
 print ('**************************************************************************\n \n')
 
-# reading csv with elements from workspace
-# i.e. directory where you installed tricrystal
-"""with open('workspace') as f:
-    line = f.readline()"""
+# USER INPUTTED CRYSTAL CIF FILE 
+my_crystal = Crystal.from_cif(input('***Input cif file*** \n'))
 
-#program_directory = str(line).rstrip("\n")
+# USER INPUTTED SUPERCELL PARAMETERS AND ROTATION ANGLE 
+print ('\n***Rotation parameters*** ')
+m = int(input('Enter m '))
+n = int(input('Enter n '))
+
+# USER INPUTTED VACUUM CELL PARAMETER 
+print('\n***Cell Vacuuum Parameter')
+z = float(input('Enter z '))
+
+#--------------------------------------------------------------------------------------------------------
+
 dir1 = os.path.join("/Users/anvitabhagavathula/Desktop/DL/TriCrystal/", 'periodic_table.csv')
 colnames = ['number', 'symbol']
 periodic_table = pandas.read_csv(dir1, usecols=colnames)
 number = periodic_table.number.tolist()
 symbol = periodic_table.symbol.tolist()
 
-# Input crystal
-my_crystal = Crystal.from_cif(input('***Input cif file*** \n'))
-
-# Input super cell parameters and rotation angle
-print ('\n***Rotation parameters*** ')
-m = int(input('Enter m '))
-n = int(input('Enter n '))
-
-# Input cell vacuum parameter 
-print('\n***Cell Vacuuum Parameter')
-z = float(input('Enter z '))
-
-# lattice parameters
+# CALCULATING LATTICE PARAMETERS 
 a, b, c, alpha, beta, gamma = my_crystal.lattice_parameters
 
-#### Initializing middle and bottom layers ####
+# INITIALISING BOTTOM AND MIDDLE LAYERS 
 tt_mid,tt_bot,elt_mid,elt_bot = bulk(my_crystal)
 
-# lattice vectors
+# CALCULATING LATTICE VECTORS 
 a1, a2, a3 = my_crystal.lattice_vectors
 uc = a1,a2,a3
 uc = np.array(uc)
+
+#--------------------------------------------------------------------------------------------------------
 
 print ('\n\nIntializing atoms...\n\n')
 
@@ -58,24 +56,24 @@ for j in range(0,len(elt_bot)):
     s = np.dot(s, np.linalg.inv(uc))
     print ('Atom No.',len(elt_mid)+j+1, ' ',elt_bot[j], ' ',s)
 
-# selecting zeroeth atoms from t/b layers
-print ('\nSelect zeroeth TOP atom')
+# SELECTING ZERO-TH ATOMS FROM MIDDLE AND BOTTOM LAYERS 
+print ('\nSelect zeroeth MIDDLE atom')
 zeroeth1 = int(input('Enter Atom No. '))
 print ('\nSelect zeroeth BOTTOM atom')
 zeroeth2 = int(input('Enter Atom No. '))
 
-# correct array indices for zeroeth atoms
+# CORRECTING ARRAY INDICES FOR ZEROETH ATOMS 
 idx1 = zeroeth1-1
 idx2 = (zeroeth2-1)-len(elt_mid)
 print ('\nZeroeth TOP (angstrom)', elt_mid[idx1], tt_mid[idx1])
 print ('\nZeroeth BOTTOM (angstrom)', elt_bot[idx2], tt_bot[idx2])
 
-# finding the bond length
+# FINDING THE BOND LENGTH 
 lengths = pdist(tt_bot, 'euclidean')
 bond_distance = round(min(lengths),3)
 print ('\nBond distance = ', bond_distance)
 
-# lattice parameters
+# PRINTING LATTICE PARAMETERS 
 print ('\nLattice Vectors (Angstrom)')
 print (' ','{:12.6f} {:12.6f} {:12.6f}'.format(a1[0],a1[1],a1[2]))
 print (' ','{:12.6f} {:12.6f} {:12.6f}'.format(a2[0],a2[1],a2[2]))
@@ -87,19 +85,24 @@ print (' ','{:12.6f} {:12.6f} {:12.6f}'.format(a1[0]*a2b,a1[1]*a2b,a1[2]*a2b))
 print (' ','{:12.6f} {:12.6f} {:12.6f}'.format(a2[0]*a2b,a2[1]*a2b,a2[2]*a2b))
 print (' ','{:12.6f} {:12.6f} {:12.6f}'.format(a3[0]*a2b,a3[1]*a2b,a3[2]*a2b))
 
-# rotation angle
+# CALCULATING ROTATION ANGLE 
 A = np.array([1,0,0])
 B = np.array([np.cos(np.deg2rad(60)),np.sin(np.deg2rad(60)),0])
 V = m*A + n*B
 rotation_angle = np.arccos((np.dot(A,V.T))/(np.linalg.norm(A)*np.linalg.norm(V)))
 rotation_angle = np.rad2deg(rotation_angle)
 
-# Rotation matrix
+# CALCULATING ROTATION MATRIX 
 theta = np.deg2rad(rotation_angle)
 phi = np.deg2rad(60) - 2*theta
 R = np.array([[np.cos(phi), -np.sin(phi), 0], [np.sin(phi), np.cos(phi), 0], [0, 0, 1]])
 print ('\nRotation angle theta (degrees) = ', rotation_angle)
 print ('\nMoire angle gamma (degrees) = ',np.rad2deg(phi))
+
+## CALCULATING INTERLAYER SCALING
+inter_scale = scale_interlayer(z)
+
+#--------------------------------------------------------------------------------------------------------
 
 print ("\n\nCALCULATING ATOMIC POSITIONS...")
 for i in range(1,2):
@@ -132,14 +135,10 @@ for atm in my_crystal.chemical_composition:
 
 
 print('\nATOMIC_POSITIONS crystal')
-#print('\nATOMIC_POSITIONS angstrom')
 
+#--------------------------------------------------------------------------------------------------------
 
-## CALCULATING INTERLAYER SCALING
-inter_scale = scale_interlayer(z)
-
-################### loops for bottom layer ##################
-#############################################################
+# LOOPS FOR BOTTOM LAYER 
 
 bt0 = time.time()
 bt1 = time.time()
@@ -168,7 +167,6 @@ for atm in tt1:
         symb2.append(u)
 symb_bot = symb1 + symb2
 atoms_bot = list(tt1) + list (tt2)
-#atoms_bot = np.array(atoms_bot)
 
 elbt1 = time.time() - bt1
 
@@ -187,7 +185,6 @@ org = central(boundary_bot)
 destinations = MultiPoint(atoms_bot)
 nearest_geoms = nearest_points(org, destinations)
 origin = np.array([nearest_geoms[1].x, nearest_geoms[1].y, 0])
-#origin = 0,0,0
 
 ex = 1
 Rb = np.array([[np.cos(0), -np.sin(0), 0], [np.sin(0), np.cos(0), 0], [0, 0, 1]])
@@ -218,7 +215,6 @@ for i in range(0,len(atoms_bot)):
 
 botl = bot
 bot = np.array(bot)
-#bot = bot - origin
 bot_frac = np.dot(bot, (np.linalg.inv(unitcell)))
 
 for i in range(1,m+n):
@@ -244,8 +240,9 @@ if len(sim) >= 1:
 
 elbt = time.time() - bt0
 
-####################### loops for middle layer ##################
-##############################################################
+#--------------------------------------------------------------------------------------------------------
+
+# LOOPS FOR MIDDLE LAYER 
 md0 = time.time()
 
 tt1 = []
@@ -344,9 +341,9 @@ if len(sim) >= 1:
 
 elmd = time.time() - md0
 
+#--------------------------------------------------------------------------------------------------------
 
-########################################################
-############## closing part of scf.in file #############
+# WRITING REMAINING SCF.IN FILE 
 
 z_posn = [] 
 
@@ -374,12 +371,9 @@ for atm in bot_frac:
     i+=1
     nat_top+=1
 
-
-# k_points
 print ('\nK_POINTS automatic')
 print ('8 8 1 1 1 1')
 
-#new_a = np.linalg.norm(newa1b)
 old_a = np.array([a*0.5*np.sqrt(3), -0.5*b, 0])
 old_b = np.array([0, b, 0])
 old_c = np.array([0, 0, c])
@@ -387,7 +381,6 @@ old_c = np.array([0, 0, c])
 newa1 = -m*old_a + n*old_b
 newa2 = -m*old_b + n*old_a
 
-# cell parameters in bohr
 uc1 = np.around(newa1b*1.8897259886, decimals=12)
 uc2 = np.around(newa2b*1.8897259886, decimals=12)
 uc3 = np.around(a3*1.8897259886, decimals=12)
@@ -395,7 +388,6 @@ uc1 = list(uc1)
 uc2 = list(uc2)
 uc3 = list(uc3)
 
-#unit_cell = ' '.join([str(elem) for elem in uc])
 print ('\nCELL_PARAMETERS bohr')
 print ('   ','{:17.12f} {:17.12f} {:17.12f}'.format(uc1[0],uc1[1],uc1[2]))
 print ('   ','{:17.12f} {:17.12f} {:17.12f}'.format(uc2[0],uc2[1],uc2[2]))
