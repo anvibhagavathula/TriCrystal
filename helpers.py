@@ -20,15 +20,16 @@ from matplotlib import path
 from datetime import date, datetime
 import time
 
-# FUNCTIONS:
-
-# ***********************************
-# Function Name: SEPERATE(MY_CRYSTAL)
-# Description: Isolates the z-coordinates (fractional) from CRYSTAL and stores them in an array
-# Inputs: Python CRYSTAL structure. i.e. don't use a supercell in SEPERATE
-# Output: Array with z-coordinates of bottom layer atoms
 
 def seperate(my_crystal):
+        """ Function isolates the z-coordinates (fractional) 
+        from CRYSTAL and stores them in an array
+        
+        Args: 
+        my_crystal: CRYSTAL structure 
+
+        Returns: 
+        Array with z-coordinates of bottom layer atoms"""
 
         nat = 0
         z_frac = []
@@ -44,13 +45,15 @@ def seperate(my_crystal):
         return answer
 
 
-# ***********************************
-# Function Name: LOWEST(MY_CRYSTAL)
-# Description: Finds the lowest z position in the crystal
-# Inputs: Python CRYSTAL structure. i.e. don't use a supercell
-# Output: z coordinate in angstrom of lowest atom
 
 def lowest(my_crystal):
+        """ Function finds the lowest z position in the crystal
+        
+        Args: 
+        my_crystal: CRYSTAL structure 
+
+        Returns: 
+        Z coordinate in angstrom of lowest atom"""
 
         nat = 0
         z_cart = []
@@ -63,13 +66,14 @@ def lowest(my_crystal):
 
 
 
-# ***********************************
-# Function Name: HIGHEST(MY_CRYSTAL)
-# Description: Finds the highest z position in the crystal
-# Inputs: Python CRYSTAL structure. i.e. don't use a supercell
-# Output: z coordinate in angstrom of highest atom
-
 def highest(my_crystal):
+        """ Function finds the highest z position in the crystal
+        
+        Args: 
+        my_crystal: CRYSTAL structure 
+
+        Returns: 
+        Z coordinate in angstrom of highest atom"""
 
         nat = 0
         z_cart = []
@@ -81,14 +85,19 @@ def highest(my_crystal):
         return max(z_cart)
 
 
-#**************************************
-# Function name: LOCATE(TEST_ATM,Z_BOT)
-# Description: Checks if a given atom is from the bottom or top layer
-# Inputs: The z-coordinate of a trial atom; an array with z-coordinates of bottom layer atoms
-# Output: True if atom is from bottom layer; false if it isn't
 
 def locate(test_atm,z_bot):
+        """ Function checks if a given atom is from 
+        the bottom or top layer
+        
+        Args: 
+        test_atm: z-coordinate of a trial atom
+        z_bot: array of z-coordinates of bottom layer atoms
 
+        Returns: 
+        Boolean indicating whether atom is from top
+        or bottom layer """
+        
         z = []
 
         test_atm = round(test_atm,2)
@@ -104,13 +113,16 @@ def locate(test_atm,z_bot):
         return answer
 
 
-# ***********************************
-# Function Name: INTERLAYER(atm_top,atm_bottom)
-# Description: Finds the interlayer seperation bettwen the layers
-# Inputs: Python crystal
-# Output: Interlayer seperation in bohr
 
 def interlayer(my_crystal):
+        """ Function finds the interlayer seperation 
+        bettwen the layers
+        
+        Args: 
+        my_crystal: CRYSTAL structure 
+
+        Returns: 
+        Interlayer seperation in bohr """
 
         atmz = []
         for atm in my_crystal:
@@ -125,20 +137,20 @@ def interlayer(my_crystal):
 
 
 
-#***********************************
-# Function name: NEWCELL(MY_CRYSTAL,M,N)
-# Description: This function creates lattice vectors of a rotated layer
-# Inputs: Python crystal; expansion parameters of desired supercell
-# Outputs: supercell lattice vectors new_a; new_b .i.e the c-vector remains unchanged
-
 def newcell(my_crystal,atoms,m,n):
+        """ Function creates lattice vectors of a 
+        rotated layer
+        
+        Args: 
+        my_crystal: CRYSTAL structure 
+        atoms: 
+        m: int expansion parameter of desired supercell 
+        n: int expansion parameter of desired supercell 
 
-#        a, b, c = my_crystal.lattice_vectors
+        Returns: 
+        Supercell lattice vectors new_a; new_b """
+
         a1, a2, a3, alpha, beta, gamma = my_crystal.lattice_parameters
-#        v1 = atoms[0] + (m+n)*a + (m+n)*b
-#        v2 = np.add(np.add(v1,(m+n)*a),n*b)
-#        v3 = np.add(np.add(v2,(m+n)*b),m*a)
-#        v4 = np.subtract(np.subtract(v3,(m+n)*a),n*b)
 
         old_a = np.array([0.5*a1*np.sqrt(3), -0.5*a2, 0])
         old_b = np.array([0, a2, 0])
@@ -148,50 +160,54 @@ def newcell(my_crystal,atoms,m,n):
         v3 = np.add(np.add(v2,(m+n)*old_b),m*old_a)
         v4 = np.subtract(np.subtract(v3,(m+n)*old_a),n*old_b)
 
-#        old_a = np.array([a1*0.5*np.sqrt(3), -0.5*a2, 0])
-#        old_b = np.array([0, a2, 0])
-#        old_c = np.array([0, 0, a3])
-
-#        new_a = n*old_b - m*old_a
-#        new_b = m*old_b - n*old_a
-
         new_a = v3 - v2
         new_b = v2 - v1
-
-        # ang to bohr mytiply by 1.8897259886
 
         return new_a, new_b, v1, v2, v3, v4
 
 
 
-
-#***********************************
-# Function name: ROTCELL(V1,V2,V3,V4,ORIGIN)
-# Description: This function gives the rotated coordinates lattice vertices of newcell
-# Inputs: vertices, origin atom, rotation matrix
-# Outputs: rotated vertices
-
 def rotcell(v1,v2,v3,v4,origin,R):
-    v1 = v1 - origin
-    v2 = v2 - origin
-    v3 = v3 - origin
-    v4 = v4 - origin
-    vr1 = np.dot(v1,R)
-    vr2 = np.dot(v2,R)
-    vr3 = np.dot(v3,R)
-    vr4 = np.dot(v4,R)
+        """ Function gives the rotated coordinates 
+        lattice vertices of newcell
+        
+        Args: 
+        v1: vertex of supercell
+        v2: vertex of supercell
+        v3: vertex of supercell
+        v4: vertex of supercell
+        origin: origin atom 
+        R: rotation matrix 
 
-    return vr1,vr2,vr3,vr4
+        Returns: 
+        Rotated vertices"""
+    
+        v1 = v1 - origin
+        v2 = v2 - origin
+        v3 = v3 - origin
+        v4 = v4 - origin
+        vr1 = np.dot(v1,R)
+        vr2 = np.dot(v2,R)
+        vr3 = np.dot(v3,R)
+        vr4 = np.dot(v4,R)
+
+        return vr1,vr2,vr3,vr4
 
 
-
-#***************************************
-# Function name: PLOY(V1,V2,V3,V4)
-# Description: Create polygon / new unit cell from vertices
-# Input: Vertices of the supercell
-# Output: polygon
 
 def poly(v1,v2,v3,v4):
+        """ Function creates polygon / new unit 
+        cell from vertices
+        
+        Args: 
+        v1: vertex of supercell
+        v2: vertex of supercell
+        v3: vertex of supercell
+        v4: vertex of supercell
+
+        Returns: 
+        Polygon vertices"""
+        
 
         p1=v1[0], v1[1]
         p2=v4[0], v4[1]
@@ -205,14 +221,17 @@ def poly(v1,v2,v3,v4):
 
 
 
-
-#***************************************
-# Function name: INPLOY(ATZ,POLY)
-# Description: Determine if an atom lies within super unit cell
-# Input: Vertices of the super unit cell
-# Output: TRUE, if atom is in, FALSE if not
-
 def inpoly(atz,ply):
+        """ Function determines if an atom lies 
+        within super unit cell
+        
+        Args: 
+        atz: vertices of the supercell 
+        ply: supercell polygon
+
+        Returns: 
+        Boolean indicating whether atom 
+        is in supercell or not """
 
         atm = Point(atz[0], atz[1])
         check1 = atm.within(ply)
@@ -223,26 +242,34 @@ def inpoly(atz,ply):
                 return check2
 
 
-#*****************************************
-# Function name: CENTRAL(ATM,V1,V2,V3,V4)
-# Description: Determine the centre of unit cell
-# Input: Vertices of the super unit cell
-# Output: central coordinates of unit cell
 
 def central(ply):
+        """ Function determines the centre of 
+        unit cell
+        
+        Args: 
+        ply: supercell polygon
+
+        Returns: 
+        Central coordinates of unit cell """
 
         center = ply.centroid
 
         return center
 
 
-#***************************************
-# Function name: SWAPED(LAYER)
-# Description: Check if rotation was performed correctly
-# Input: Array with rotated atoms
-# Output: True if the rotation is correct, False if it isn't
 
 def swaped(layer):
+        """ Function checks if rotation was 
+        performed correctly
+        
+        Args: 
+        layer: array of rotated atoms
+
+        Returns: 
+        Boolean indicating whether rotation
+        was performed correctly """
+
         pos_count = 0
         neg_count = 0
         for atm in layer:
@@ -256,13 +283,17 @@ def swaped(layer):
                 return False
 
 
-#***************************************
-# Function name: NTYPE(MY_CRYSTAL)
-# Description: Check how many atomic species present in crystal
-# Input: python Crystal
-# Output: Number of atoms ---> Integer
 
 def ntype(my_crystal):
+        """ Function checks how many atomic species 
+        are present in crystal
+        
+        Args: 
+        my_crystal: CRYSTAL structure 
+
+        Returns: 
+        Integer number of atoms """
+        
         nat = 0
         for atm in my_crystal.chemical_composition:
                 nat+=1
@@ -277,6 +308,16 @@ def ntype(my_crystal):
 # Output: top and bottom atoms ---> np arrays; chemical symbols for top and bottom  atoms ---> lists
 
 def bulk(my_crystal):
+        """ Function creates arrays of top and 
+        bottom atoms in the crystal
+        
+        Args: 
+        my_crystal: CRYSTAL structure 
+
+        Returns: 
+        Arrays of top and bottom atom positions 
+        and lists of chemical symbols for top and 
+        bottom atoms """
 
         atoms_bot = []
         atoms_top = []
@@ -301,7 +342,15 @@ def bulk(my_crystal):
 #***************************************
 
 def scale_interlayer(vacuum_param): 
-        """ """
+        """ Function scales the interlayer spacing between
+        layers to ensure that they are ~3.6 angstroms apart
+        scaled accordingly to the selected cell vacuum parameter 
+        
+        Args: 
+        my_crystal: float of cell vacuum parameter 
+
+        Returns: 
+        Scaled value of interlayer spacing """
 
         spacing = (0.084 * vacuum_param) / 80.0 
         spacing = np.round(spacing, 3)
