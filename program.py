@@ -29,6 +29,10 @@ print ('\n***Rotation parameters*** ')
 m = int(input('Enter m '))
 n = int(input('Enter n '))
 
+# Input cell vacuum parameter 
+print('\n***Cell Vacuuum Parameter')
+z = float(input('Enter z '))
+
 # lattice parameters
 a, b, c, alpha, beta, gamma = my_crystal.lattice_parameters
 
@@ -115,9 +119,7 @@ nat = ntype(my_crystal)
 print (" ntyp= ",nat,",",sep="")
 print (" ecutwfc=80.0,")
 print (" ecutrho=800.0,")
-print (' xdm=.true.,')
-print (" xdm_a1=0.6512,")
-print (" xdm_a2=1.4633,\n/")
+print ("vdw_corr=\'xdm\',\n/")
 print ("&electrons")
 print (" conv_thr = 1d-8\n/\n&ions\n/\n&cell\n/")
 print ("ATOMIC_SPECIES")
@@ -131,6 +133,10 @@ for atm in my_crystal.chemical_composition:
 
 print('\nATOMIC_POSITIONS crystal')
 #print('\nATOMIC_POSITIONS angstrom')
+
+
+## CALCULATING INTERLAYER SCALING
+inter_scale = scale_interlayer(z)
 
 ################### loops for bottom layer ##################
 #############################################################
@@ -236,13 +242,6 @@ if len(sim) >= 1:
     bot_frac = np.delete(bot_frac, sim[1:], 0)
     symbot = np.delete(symbot, sim[1:], 0)
 
-i = 0
-nat_bot=0
-for atm in bot_frac:
-    print ('{:2} {:12.6f} {:12.6f} {:12.6f}'.format(symbot[i], atm[0], atm[1], atm[2]))
-    i+=1
-    nat_bot+=1
-
 elbt = time.time() - bt0
 
 ####################### loops for middle layer ##################
@@ -343,30 +342,37 @@ if len(sim) >= 1:
     mid_frac = np.delete(mid_frac, sim[1:], 0)
     symtop = np.delete(symmid, sim[1:], 0)
 
+elmd = time.time() - md0
+
+
+########################################################
+############## closing part of scf.in file #############
+
+z_posn = [] 
+
+for atm in mid_frac: 
+    z_posn.append(atm[2])
+
+i = 0
+nat_bot=0
+for atm in bot_frac:
+    print ('{:2} {:12.6f} {:12.6f} {:12.6f}'.format(symbot[i], atm[0], atm[1], z_posn[i]-inter_scale))
+    i+=1
+    nat_bot+=1
+
 i = 0
 nat_mid=0
 for atm in mid_frac:
-    print ('{:2} {:12.6f} {:12.6f} {:12.6f}'.format(symmid[i], atm[0], atm[1], atm[2]))
+    print ('{:2} {:12.6f} {:12.6f} {:12.6f}'.format(symmid[i], atm[0], atm[1], z_posn[i]))
     i+=1
     nat_mid+=1
-
-elmd = time.time() - md0
-
-################### loops for top layer ##################
-#############################################################
-tp0 = time.time()
 
 i = 0
 nat_top=0
 for atm in bot_frac:
-    print ('{:2} {:12.6f} {:12.6f} {:12.6f}'.format(symbot[i], atm[0], atm[1], atm[2]+1.0))
+    print ('{:2} {:12.6f} {:12.6f} {:12.6f}'.format(symbot[i], atm[0], atm[1], z_posn[i]+inter_scale)) 
     i+=1
     nat_top+=1
-
-eltp = time.time() - tp0
-
-########################################################
-############## closing part of scf.in file #############
 
 
 # k_points
@@ -393,4 +399,4 @@ uc3 = list(uc3)
 print ('\nCELL_PARAMETERS bohr')
 print ('   ','{:17.12f} {:17.12f} {:17.12f}'.format(uc1[0],uc1[1],uc1[2]))
 print ('   ','{:17.12f} {:17.12f} {:17.12f}'.format(uc2[0],uc2[1],uc2[2]))
-print ('   ','{:17.12f} {:17.12f} {:17.12f}'.format(uc3[0],uc3[1],uc3[2]))
+print ('   ','{:17.12f} {:17.12f} {:17.12f}'.format(uc3[0],uc3[1],z))

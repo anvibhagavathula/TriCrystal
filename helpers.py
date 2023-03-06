@@ -297,3 +297,13 @@ def bulk(my_crystal):
                         ELE = str(atm).lower()
                         ele_top.append(ELE)
         return np.array(atoms_top), np.array(atoms_bot), ele_top, ele_bot
+
+#***************************************
+
+def scale_interlayer(vacuum_param): 
+        """ """
+
+        spacing = (0.084 * vacuum_param) / 80.0 
+        spacing = np.round(spacing, 3)
+
+        return spacing 
