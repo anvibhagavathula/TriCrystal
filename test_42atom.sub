@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Request an hour of runtime:
+#SBATCH --time=12:00:00
+
+# Use 4 nodes with 8 tasks each, for 32 MPI tasks:
+#SBATCH -N 4
+#SBATCH --tasks-per-node=8
+#SBATCH --mem-per-cpu=2G
+
+# Specify a job name:
+#SBATCH -J test_42atom_convergence
+
+# Specify an output file
+#SBATCH -o test_42atom.scf.out
+#SBATCH -e test_42atom.scf.err
+
+# load required modules
+module load quantumespresso/6.5
+module load gcc/8.3 mpi/openmpi_4.0.3_gcc intel/2019.3 hdf5/1.10.5_fortran fftw/3.3.8
+
+# run the program
+srun --mpi=pmix -n 32 pw.x -input test_42atom.scf.in

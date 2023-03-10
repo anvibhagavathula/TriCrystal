@@ -23,7 +23,7 @@ z = float(input('Enter z '))
 
 #--------------------------------------------------------------------------------------------------------
 
-dir1 = os.path.join("/Users/anvitabhagavathula/Desktop/DL/TriCrystal/", 'periodic_table.csv')
+dir1 = os.path.join("/Users/anvitabhagavathula/Desktop/TriCrystal/", 'periodic_table.csv')
 colnames = ['number', 'symbol']
 periodic_table = pandas.read_csv(dir1, usecols=colnames)
 number = periodic_table.number.tolist()
@@ -112,16 +112,16 @@ for i in range(1,2):
 print ("&control")
 print ( " title='crystal',")
 print ( " prefix='crystal',")
-print ( " pseudo_dir='.',")
-print ( " calculation='relax',\n etot_conv_thr=1.0D-5,\n forc_conv_thr=1.0D-4,\n/")
+print ( " pseudo_dir='/users/abhagava/scratch/pseudos/B86bPBE/',")
+print ( " calculation='scf',\n etot_conv_thr=1.0D-5,\n forc_conv_thr=1.0D-4,\n/")
 print ( "&system")
 print (" ibrav=0,")
-print (" nat= atoms,")
+print (" nat=42,")
 
 nat = ntype(my_crystal)
 print (" ntyp= ",nat,",",sep="")
-print (" ecutwfc=80.0,")
-print (" ecutrho=800.0,")
+print (" ecutwfc=90.0,")
+print (" ecutrho=900.0,")
 print (" vdw_corr=\'xdm\',\n/")
 print ("&electrons")
 print (" conv_thr = 1d-8\n/\n&ions\n/\n&cell\n/")
@@ -372,7 +372,7 @@ for atm in bot_frac:
     nat_top+=1
 
 print ('\nK_POINTS automatic')
-print ('8 8 1 1 1 1')
+print ('6 6 1 1 1 1')
 
 old_a = np.array([a*0.5*np.sqrt(3), -0.5*b, 0])
 old_b = np.array([0, b, 0])
