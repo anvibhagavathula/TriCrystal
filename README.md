@@ -1,0 +1,1 @@
+TriCrystal is a Python program that builds commensurate and incommensurate crystal structures of twisted trilayer graphene. The current version reads CIF files and writes the new structure to a QUANTUM ESPRESSO input file.
